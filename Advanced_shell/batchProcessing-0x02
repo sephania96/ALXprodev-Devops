@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# Task 2: Fetch data for a batch of Pokémon and store each in its own JSON file
+
+# Create output directory if it doesn't exist
+mkdir -p pokemon_data
+
+# List of Pokémon to fetch
+pokemon_list=(bulbasaur ivysaur venusaur charmander charmeleon)
+
+# Loop through each Pokémon
+for name in "${pokemon_list[@]}"; do
+  echo "Fetching data for $name..."
+
+  # Attempt the API call
+  response=$(curl -s -w "%{http_code}" -o "pokemon_data/$name.json" "https://pokeapi.co/api/v2/pokemon/$name")
+
+  # Check if successful (HTTP 200)
+  if [ "$response" = "200" ]; then
+    echo "Saved data to pokemon_data/$name.json ✅"
+  else
+    echo "Failed to fetch data for $name. HTTP status: $response" >> fetch_errors.log
+    rm -f "pokemon_data/$name.json" # Remove partial file if created
+  fi
+
+  sleep 1  # Add delay to avoid rate-limiting
+
+done
