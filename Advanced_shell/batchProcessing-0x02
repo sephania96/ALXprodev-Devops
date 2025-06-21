@@ -1,28 +1,31 @@
 #!/bin/bash
 
-# Task 2: Fetch data for a batch of Pokémon and store each in its own JSON file
+# Task 4: Retry logic for failed API fetches during batch retrieval
 
-# Create output directory if it doesn't exist
+POKEMON_LIST=(bulbasaur ivysaur venusaur charmander charmeleon)
 mkdir -p pokemon_data
 
-# List of Pokémon to fetch
-pokemon_list=(bulbasaur ivysaur venusaur charmander charmeleon)
-
-# Loop through each Pokémon
-for name in "${pokemon_list[@]}"; do
+for name in "${POKEMON_LIST[@]}"; do
   echo "Fetching data for $name..."
 
-  # Attempt the API call
-  response=$(curl -s -w "%{http_code}" -o "pokemon_data/$name.json" "https://pokeapi.co/api/v2/pokemon/$name")
+  attempts=0
+  success=false
 
-  # Check if successful (HTTP 200)
-  if [ "$response" = "200" ]; then
-    echo "Saved data to pokemon_data/$name.json ✅"
-  else
-    echo "Failed to fetch data for $name. HTTP status: $response" >> fetch_errors.log
-    rm -f "pokemon_data/$name.json" # Remove partial file if created
+  while [ $attempts -lt 3 ]; do
+    response=$(curl -s -w "%{http_code}" -o "pokemon_data/${name}.json" "https://pokeapi.co/api/v2/pokemon/$name")
+    if [ "$response" = "200" ]; then
+      echo "Saved data to pokemon_data/${name}.json ✅"
+      success=true
+      break
+    else
+      echo "Attempt $((attempts + 1)) for $name failed. Retrying..."
+      sleep 2
+    fi
+    attempts=$((attempts + 1))
+  done
+
+  if ! $success; then
+    echo "Failed to fetch $name after 3 attempts" >> fetch_errors.log
   fi
-
-  sleep 1  # Add delay to avoid rate-limiting
 
 done
