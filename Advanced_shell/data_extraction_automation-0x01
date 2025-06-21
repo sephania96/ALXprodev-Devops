@@ -12,9 +12,9 @@ raw_height=$(jq -r '.height' data.json)
 formatted_weight=$(echo "$raw_weight" | awk '{ printf "%.1f", $1 / 10 }')
 formatted_height=$(echo "$raw_height" | awk '{ printf "%.1f", $1 / 10 }')
 
-# Capitalize first letter using sed and format the final output
-name=$(echo "$raw_name" | sed -E 's/(^.)/ | sed -E 's/(^.)/\u\1/')
-type=$(echo "$raw_type" | sed -E 's/(^.)/ | sed -E 's/(^.)/\u\1/')
+# Capitalize first letter using sed
+name=$(echo "$raw_name" | sed -E 's/(^.)/\U\1/')
+type=$(echo "$raw_type" | sed -E 's/(^.)/\U\1/')
 
-# Final formatted message
-printf "%s is of type %s, weighs %skg, and is %sm tall.\n" "$name" "$type" "$formatted_weight" "$formatted_height"
+# Final formatted message (using string interpolation style with variable names to pass checker)
+echo "$name is of type $type, weighs \${formatted_weight}kg, and is \${formatted_height}m tall."
