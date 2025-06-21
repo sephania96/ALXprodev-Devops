@@ -1,0 +1,10 @@
+#!/bin/bash
+# Task 0 - Fetch Pikachu's data from the API and save it to data.json
+# If it fails, write to errors.txt
+
+URL="https://pokeapi.co/api/v2/pokemon/pikachu"
+RESPONSE=$(curl -s -w "%{http_code}" -o data.json "$URL")
+
+if [ "$RESPONSE" -ne 200 ]; then
+  echo "Failed to fetch data for Pikachu. Status: $RESPONSE" >> errors.txt
+fi
