@@ -2,7 +2,11 @@
 
 # Task 1: Extract name, height, weight, and type from data.json and print human-readable summary
 
-jq -r '
-  "\(.name | ascii_upcase) is of type \(.types[0].type.name | ascii_upcase), \
-  weighs \(.weight / 10)kg, and is \(.height / 10)m tall."
-' data.json
+# Use jq to extract and format the values
+name=$(jq -r '.name' data.json)
+type=$(jq -r '.types[0].type.name' data.json)
+weight=$(jq -r '.weight' data.json)
+height=$(jq -r '.height' data.json)
+
+# Convert units and format output
+echo "${name^} is of type ${type^}, weighs $(echo "scale=1; $weight/10" | bc)kg, and is $(echo "scale=1; $height/10" | bc)m tall."
