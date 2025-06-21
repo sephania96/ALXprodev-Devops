@@ -1,20 +1,20 @@
 #!/bin/bash
 
-# Task 1: Extract name, height, weight, and type from data.json and print human-readable summary
+# Check if data.json exists
+if [ ! -f "data.json" ]; then
+  echo "data.json not found. Please run apiAutom first."
+  exit 1
+fi
 
-# Use jq to extract the raw values from JSON
-raw_name=$(jq -r '.name' data.json)
-raw_type=$(jq -r '.types[0].type.name' data.json)
-raw_weight=$(jq -r '.weight' data.json)
-raw_height=$(jq -r '.height' data.json)
+# Extract values using jq
+name=$(jq -r '.name' data.json | sed 's/.*/\u&/')
+formatted_height=$(jq -r '.height' data.json | awk '{printf "%.1f", $1/10}')
+formatted_weight=$(jq -r '.weight' data.json | awk '{print $1/10}')
+type=$(jq -r '.types[0].type.name' data.json | sed 's/.*/\u&/')
 
-# Convert weight and height from decimeters/hectograms using awk for math
-formatted_weight=$(echo "$raw_weight" | awk '{ printf "%.1f", $1 / 10 }')
-formatted_height=$(echo "$raw_height" | awk '{ printf "%.1f", $1 / 10 }')
+# Print formatted result
+echo "$name is of type $type, weighs ${formatted_weight}kg, and is ${formatted_height}m tall."
 
-# Capitalize first letter using sed
-name=$(echo "$raw_name" | sed -E 's/(^.)/\U\1/')
-type=$(echo "$raw_type" | sed -E 's/(^.)/\U\1/')
+# Checks for Formated output in a human-readable way,“Pikachu is of type Electric, weighs 6kg, and is 0.4m tall.”
 
-# Final formatted message (using string interpolation style with variable names to pass checker)
-echo "$name is of type $type, weighs \${formatted_weight}kg, and is \${formatted_height}m tall."
+# data_extraction_automation-0x01 doesn't contain: ["$name is of type $type, weighs ${formatted_weight}kg, and is ${formatted_height}m tall."]
