@@ -2,11 +2,19 @@
 
 # Task 1: Extract name, height, weight, and type from data.json and print human-readable summary
 
-# Use jq to extract and format the values
-name=$(jq -r '.name' data.json)
-type=$(jq -r '.types[0].type.name' data.json)
-weight=$(jq -r '.weight' data.json)
-height=$(jq -r '.height' data.json)
+# Use jq to extract the raw values from JSON
+raw_name=$(jq -r '.name' data.json)
+raw_type=$(jq -r '.types[0].type.name' data.json)
+raw_weight=$(jq -r '.weight' data.json)
+raw_height=$(jq -r '.height' data.json)
 
-# Convert units and format output
-echo "${name^} is of type ${type^}, weighs $(echo "scale=1; $weight/10" | bc)kg, and is $(echo "scale=1; $height/10" | bc)m tall."
+# Convert weight and height from decimeters/hectograms using awk for math
+formatted_weight=$(echo "$raw_weight" | awk '{ printf "%.1f", $1 / 10 }')
+formatted_height=$(echo "$raw_height" | awk '{ printf "%.1f", $1 / 10 }')
+
+# Capitalize first letter using sed and format the final output
+name=$(echo "$raw_name" | sed -E 's/(^.)/ | sed -E 's/(^.)/\u\1/')
+type=$(echo "$raw_type" | sed -E 's/(^.)/ | sed -E 's/(^.)/\u\1/')
+
+# Final formatted message
+printf "%s is of type %s, weighs %skg, and is %sm tall.\n" "$name" "$type" "$formatted_weight" "$formatted_height"
