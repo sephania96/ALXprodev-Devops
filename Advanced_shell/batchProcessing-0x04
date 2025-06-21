@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# Task 5: Parallel Data Fetching using background jobs
+
+POKEMON_LIST=(bulbasaur ivysaur venusaur charmander charmeleon)
+mkdir -p pokemon_data
+
+fetch_pokemon() {
+  name=$1
+  echo "Fetching data for $name..."
+
+  attempts=0
+  success=false
+
+  while [ $attempts -lt 3 ]; do
+    response=$(curl -s -w "%{http_code}" -o "pokemon_data/${name}.json" "https://pokeapi.co/api/v2/pokemon/$name")
+    if [ "$response" = "200" ]; then
+      echo "Saved data to pokemon_data/${name}.json ✅"
+      success=true
+      break
+    else
+      echo "Attempt $((attempts + 1)) for $name failed. Retrying..."
+      sleep 2
+    fi
+    attempts=$((attempts + 1))
+  done
+
+  if ! $success; then
+    echo "Failed to fetch $name after 3 attempts" >> fetch_errors.log
+  fi
+}
+
+# Launch fetches in parallel
+for name in "${POKEMON_LIST[@]}"; do
+  fetch_pokemon "$name" &
+done
+
+# Wait for all background processes to finish
+wait
