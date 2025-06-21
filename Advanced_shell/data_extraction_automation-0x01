@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# Task 1: Extract name, height, weight, and type from data.json and print human-readable summary
+
+jq -r '
+  "\(.name | ascii_upcase) is of type \(.types[0].type.name | ascii_upcase), \
+  weighs \(.weight / 10)kg, and is \(.height / 10)m tall."
+' data.json
